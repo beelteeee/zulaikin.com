@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Тест API</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #f4f6f9; }
+    .btn { margin: 0.5rem; padding: 0.8rem 1.5rem; border: none; background: #007bff; color: #fff; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    .btn:hover { background: #0056b3; }
+    pre { background: #2d2d2d; color: #00ff00; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+    .status { margin: 10px 0; font-weight: bold; color: #333; }
+  </style>
+</head>
+<body>
+  <h1>🌐 Проверка работы API</h1>
+  <div>
+    <button class="btn" onclick="call('/hello')">GET /hello</button>
+    <button class="btn" onclick="call('/date')">GET /date</button>
+    <button class="btn" onclick="call('/echo', 'POST', { name: 'Zulaikin', role: 'Student' })">POST /echo</button>
+  </div>
+  
+  <div class="status" id="status">Нажми кнопку...</div>
+  <pre id="output">Результат появится здесь</pre>
+
+  <script>
+    // API лежит в папке public уровнем выше
+    const API_BASE = '/api/public'; 
+
+    async function call(endpoint, method = 'GET', body = null) {
+      const output = document.getElementById('output');
+      const status = document.getElementById('status');
+      status.textContent = `⏳ Отправка запроса ${method} ${endpoint}...`;
+      output.textContent = 'Загрузка...';
+
+      try {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+
+        const res = await fetch(`${API_BASE}${endpoint}`, opts);
+        const data = await res.json();
+        
+        status.textContent = `✅ Статус: ${res.status} OK`;
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        status.textContent = `❌ Ошибка: ${e.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
