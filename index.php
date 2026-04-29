@@ -1,32 +1,18 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Регистрация</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="form-box">
-        <h2>📝 Регистрация</h2>
-        <form action="action.php" method="post">
-            <label for="name">Имя:</label>
-            <input type="text" id="name" name="name" required placeholder="Введите имя">
+<?php include 'includes/header.php'; ?>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required placeholder="example@mail.com">
-
-            <label for="password">Пароль:</label>
-            <input type="password" id="password" name="password" required placeholder="Минимум 6 символов">
-
-            <label for="gender">Пол:</label>
-            <select id="gender" name="gender">
-                <option value="male">Мужской</option>
-                <option value="female">Женский</option>
-                <option value="other">Не указан</option>
-            </select>
-
-            <button type="submit">Зарегистрироваться</button>
-        </form>
+<main class="main">
+    <div class="container">
+        <section class="hero">
+            <h1 class="hero-title">Добро пожаловать!</h1>
+            <p class="hero-subtitle">Это главная страница нашего проекта на PHP.</p>
+            <p class="hero-text">Здесь мы учимся работать со структурой и Git, создаём многостраничные сайты с динамическим меню.</p>
+            
+            <div class="info-card">
+                <h3>📌 Важно</h3>
+                <p>Старая форма регистрации теперь здесь: <a href="lab10-register.php" class="link">lab10-register.php</a></p>
+            </div>
+        </section>
     </div>
-</body>
-</html>
+</main>
+
+<?php include 'includes/footer.php'; ?>
