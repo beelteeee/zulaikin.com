@@ -2,7 +2,8 @@
 $menuItems = [
     'Главная' => '/index.php',
     'О нас' => '/pages/about.php',
-    'Контакты' => '/pages/contact.php'
+    'Контакты' => '/pages/contact.php',
+    'Добавить' =>' /pages/add_article.php'
 ];
 ?>
 <!DOCTYPE html>
