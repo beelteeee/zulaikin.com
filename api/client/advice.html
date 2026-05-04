@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Совет дня</title>
+    <style>
+        body{font-family:Arial,sans-serif;max-width:600px;margin:50px auto;padding:20px;background:#f5f5f5}
+        .card{background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);text-align:center}
+        .advice{font-size:1.2rem;margin:20px 0;line-height:1.6}
+        .btn{background:#667eea;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:1rem;margin:5px}
+        .btn:hover{background:#556cd6}
+        .saved{margin-top:20px;text-align:left}
+        .saved-item{background:#f8f9fa;padding:10px;margin:8px 0;border-radius:6px;border-left:3px solid #667eea}
+        .saved-item button{background:#dc3545;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>💡 Совет дня</h1>
+        <button class="btn" onclick="getAdvice()">Получить совет</button>
+        <div class="advice" id="advice">Нажмите кнопку, чтобы получить совет</div>
+        <button class="btn" id="saveBtn" onclick="saveAdvice()" style="display:none">❤️ Сохранить</button>
+        
+        <div class="saved">
+            <h3>Сохранённые советы:</h3>
+            <div id="savedList"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentAdvice = '';
+        
+        async function getAdvice() {
+            try {
+                const res = await fetch('https://api.adviceslip.com/advice');
+                const data = await res.json();
+                currentAdvice = data.slip.advice;
+                document.getElementById('advice').textContent = `"${currentAdvice}"`;
+                document.getElementById('saveBtn').style.display = 'inline-block';
+            } catch(e) {
+                document.getElementById('advice').textContent = '❌ Ошибка загрузки';
+            }
+        }
+        
+        function saveAdvice() {
+            if(!currentAdvice) return;
+            let saved = JSON.parse(localStorage.getItem('savedAdvices') || '[]');
+            if(!saved.includes(currentAdvice)) {
+                saved.push(currentAdvice);
+                localStorage.setItem('savedAdvices', JSON.stringify(saved));
+                renderSaved();
+                alert('✅ Совет сохранён!');
+            }
+        }
+        
+        function deleteAdvice(idx) {
+            let saved = JSON.parse(localStorage.getItem('savedAdvices') || '[]');
+            saved.splice(idx, 1);
+            localStorage.setItem('savedAdvices', JSON.stringify(saved));
+            renderSaved();
+        }
+        
+        function renderSaved() {
+            const saved = JSON.parse(localStorage.getItem('savedAdvices') || '[]');
+            const list = document.getElementById('savedList');
+            if(saved.length === 0) {
+                list.innerHTML = '<em>Пока нет сохранённых советов</em>';
+                return;
+            }
+            list.innerHTML = saved.map((txt, i) => 
+                `<div class="saved-item">"${txt}" <button onclick="deleteAdvice(${i})">✕</button></div>`
+            ).join('');
+        }
+        
+        // Загрузить сохранённые при старте
+        renderSaved();
+    </script>
+</body>
+</html>
