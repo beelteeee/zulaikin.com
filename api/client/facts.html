@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Факты о животных</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .animal-select {
+            margin: 15px 0;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .fact-box {
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fact-text {
+            font-size: 1.1rem;
+            color: #2d3748;
+            line-height: 1.5;
+        }
+        .save-btn {
+            background: #1abc9c;
+        }
+        .save-btn:hover { background: #16a085; }
+        .saved-section {
+            margin-top: 30px;
+            text-align: left;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 20px;
+        }
+        .saved-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .saved-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .saved-item {
+            background: #f1f5f9;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        .saved-item button {
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .saved-item button:hover { background: #c0392b; }
+        .loading { color: #718096; font-style: italic; }
+        .error { color: #e74c3c; font-weight: 500; }
+        @media (max-width: 480px) {
+            .card { padding: 20px; }
+            h1 { font-size: 1.4rem; }
+            .fact-text { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🐾 Факты о животных</h1>
+        
+        <select class="animal-select" id="animalSelect">
+            <option value="cat">🐱 Кот</option>
+            <option value="dog">🐶 Собака</option>
+            <option value="panda">🐼 Панда</option>
+            <option value="fox">🦊 Лиса</option>
+            <option value="bird">🐦 Птица</option>
+            <option value="raccoon">🦝 Енот</option>
+        </select>
+        
+        <div>
+            <button class="btn" id="getFactBtn" onclick="getFact()">🎲 Получить факт</button>
+            <button class="btn save-btn" id="saveBtn" onclick="saveFact()" style="display:none">❤️ Сохранить</button>
+        </div>
+        
+        <div class="fact-box" id="factBox">
+            <span class="loading">Выберите животное и нажмите кнопку</span>
+        </div>
+        
+        <div class="saved-section">
+            <h3>💾 Сохранённые факты:</h3>
+            <div class="saved-list" id="savedList">
+                <em style="color:#718096">Пока нет сохранённых фактов</em>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFact = '';
+        const APIs = {
+            cat: 'https://catfact.ninja/fact',
+            dog: 'https://dogapi.dog/api/v2/facts',
+            panda: 'https://some-random-api.com/animal/panda',
+            fox: 'https://some-random-api.com/animal/fox',
+            bird: 'https://some-random-api.com/animal/bird',
+            raccoon: 'https://some-random-api.com/animal/raccoon'
+        };
+
+        async function getFact() {
+            const animal = document.getElementById('animalSelect').value;
+            const factBox = document.getElementById('factBox');
+            const getBtn = document.getElementById('getFactBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            factBox.innerHTML = '<span class="loading">Загрузка...</span>';
+            getBtn.disabled = true;
+            saveBtn.style.display = 'none';
+            currentFact = '';
+            
+            try {
+                let response, data, fact;
+                
+                if (animal === 'cat') {
+                    response = await fetch(APIs.cat);
+                    data = await response.json();
+                    fact = data.fact;
+                } else if (animal === 'dog') {
+                    response = await fetch(APIs.dog);
+                    data = await response.json();
+                    fact = data.data?.[0]?.attributes?.body || 'Факт не найден';
+                } else {
+                    response = await fetch(APIs[animal]);
+                    data = await response.json();
+                    fact = data.fact;
+                }
+                
+                if (!fact) throw new Error('Пустой ответ');
+                
+                currentFact = fact;
+                factBox.innerHTML = `<span class="fact-text">${fact}</span>`;
+                saveBtn.style.display = 'inline-block';
+                
+            } catch (e) {
+                factBox.innerHTML = `<span class="error">❌ Ошибка: ${e.message}</span>`;
+            } finally {
+                getBtn.disabled = false;
+            }
+        }
+        
+        function saveFact() {
+            if (!currentFact) return;
+            const animal = document.getElementById('animalSelect').options[
+                document.getElementById('animalSelect').selectedIndex
+            ].text;
+            
+            let saved = JSON.parse(localStorage.getItem('savedFacts') || '[]');
+            const entry = { fact: currentFact, animal, date: new Date().toLocaleDateString('ru-RU') };
+            
+            if (!saved.some(s => s.fact === currentFact)) {
+                saved.unshift(entry);
+                if (saved.length > 20) saved.pop();
+                localStorage.setItem('savedFacts', JSON.stringify(saved));
+                renderSaved();
+                alert('✅ Факт сохранён!');
+            }
+        }
+        
+        function deleteFact(idx) {
+            let saved = JSON.parse(localStorage.getItem('savedFacts') || '[]');
+            saved.splice(idx, 1);
+            localStorage.setItem('savedFacts', JSON.stringify(saved));
+            renderSaved();
+        }
+        
+        function renderSaved() {
+            const saved = JSON.parse(localStorage.getItem('savedFacts') || '[]');
+            const list = document.getElementById('savedList');
+            
+            if (saved.length === 0) {
+                list.innerHTML = '<em style="color:#718096">Пока нет сохранённых фактов</em>';
+                return;
+            }
+            
+            list.innerHTML = saved.map((item, i) => `
+                <div class="saved-item">
+                    <div>
+                        <strong>${item.animal}</strong> <small style="color:#718096">(${item.date})</small><br>
+                        ${item.fact}
+                    </div>
+                    <button onclick="deleteFact(${i})">✕</button>
+                </div>
+            `).join('');
+        }
+        
+        // Загрузить сохранённые при старте
+        renderSaved();
+    </script>
+</body>
+</html>
